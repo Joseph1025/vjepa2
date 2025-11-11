@@ -102,7 +102,7 @@ def run_sample_inference():
         "facebook/vjepa2-vitg-fpc64-384"  # Replace with your favored model, e.g. facebook/vjepa2-vitg-fpc64-384
     )
     # Path to local PyTorch weights
-    pt_model_path = "YOUR_MODEL_PATH"
+    pt_model_path = "/home/zexi/Dev/vjepa2/samples/vitg.pt"
 
     sample_video_path = "sample_video.mp4"
     # Download the video if not yet downloaded to local path

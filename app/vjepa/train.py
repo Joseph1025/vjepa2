@@ -25,6 +25,7 @@ import torch
 import torch.multiprocessing as mp
 import torch.nn.functional as F
 from torch.nn.parallel import DistributedDataParallel
+from tqdm import tqdm
 
 from app.vjepa.transforms import make_transforms
 from app.vjepa.utils import init_opt, init_video_model, load_checkpoint
@@ -378,7 +379,8 @@ def main(args, resume_preempt=False):
         gpu_time_meter = AverageMeter()
         data_elapsed_time_meter = AverageMeter()
 
-        for itr in range(ipe):
+        pbar = tqdm(range(ipe), desc=f"Rank {rank} Epoch {epoch+1}", position=rank, leave=True, dynamic_ncols=True)
+        for itr in pbar:
             itr_start_time = time.time()
 
             iter_retries = 0
@@ -495,6 +497,16 @@ def main(args, resume_preempt=False):
             iter_time_meter.update(iter_elapsed_time_ms)
             gpu_time_meter.update(gpu_etime_ms)
             data_elapsed_time_meter.update(data_elapsed_time_ms)
+
+            # -- Update progress bar
+            pbar.set_postfix({
+                'loss': f'{loss_meter.avg:.3f}',
+                'lr': f'{_new_lr:.2e}',
+                'wd': f'{_new_wd:.2e}',
+                'iter_ms': f'{iter_time_meter.avg:.1f}',
+                'gpu_ms': f'{gpu_time_meter.avg:.1f}',
+                'data_ms': f'{data_elapsed_time_meter.avg:.1f}'
+            })
 
             # -- Logging
             def log_stats():
